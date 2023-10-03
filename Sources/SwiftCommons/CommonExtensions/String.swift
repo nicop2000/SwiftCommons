@@ -40,4 +40,8 @@ public extension String {
     func isNumeric() -> Bool {
         NumberFormatter().number(from: self) != nil
     }
+
+    func toBool() -> Bool {
+        ["TRUE", "YES", "1"].contains(self.lowercased())
+    }
 }

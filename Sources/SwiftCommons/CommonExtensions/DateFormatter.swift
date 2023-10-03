@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension DateFormatter {
+public extension DateFormatter {
     static var dateGerman: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale.current

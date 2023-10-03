@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Data {
+public extension Data {
     public var bytes: Array<UInt8> {
       Array(self)
     }

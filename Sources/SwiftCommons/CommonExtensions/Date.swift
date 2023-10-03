@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Date {
+public extension Date {
     func utc(_ format: String = "yyyy-MM-dd HH:mm:ss") -> String {
         self.format(format, timeZone: TimeZone(identifier: "UTC")!)
     }

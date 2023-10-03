@@ -92,63 +92,25 @@ public extension KeychainManager {
     }
     
     enum KeychainItemAccessLevel: RawRepresentable {
-        /**
-          The data in the keychain item cannot be accessed after a restart until the device has been unlocked once by the user.
-         
-          After the first unlock, the data remains accessible until the next restart. This is recommended for items that need to be accessed by background applications. Items with this attribute migrate to a new device when using encrypted backups.
-         */
-        
+        /// After a restart the phone must be unlocked once to access the data. Afterwards it stays available till the next restart
+        /// Included in encrypted backups
         case afterFirstUnlock
-        
-        /**
-         The data in the keychain item cannot be accessed after a restart until the device has been unlocked once by the user.
-         
-         After the first unlock, the data remains accessible until the next restart. This is recommended for items that need to be accessed by background applications. Items with this attribute do not migrate to a new device. Thus, after restoring from a backup of a different device, these items will not be present.
-         */
-        
+
+        /// After a restart the phone must be unlocked once to access the data. Afterwards it stays available till the next restart
+        /// NOT included in encrypted backups
         case afterFirstUnlockThisDeviceOnly
-        
-        /**
-         The data in the keychain item can always be accessed regardless of whether the device is locked.
-         
-         This is not recommended for application use. Items with this attribute migrate to a new device when using encrypted backups.
-         */
-        
-        case always
-        
-        /**
-         The data in the keychain can only be accessed when the device is unlocked. Only available if a passcode is set on the device.
-         
-         This is recommended for items that only need to be accessible while the application is in the foreground. Items with this attribute never migrate to a new device. After a backup is restored to a new device, these items are missing. No items can be stored in this class on devices without a passcode. Disabling the device passcode causes all items in this class to be deleted.
-         */
-        
-        case whenPasscodeSetThisDeviceOnly
-        
-        /**
-         The data in the keychain item can always be accessed regardless of whether the device is locked.
-         
-         This is not recommended for application use. Items with this attribute do not migrate to a new device. Thus, after restoring from a backup of a different device, these items will not be present.
-         */
-        
-        case alwaysThisDeviceOnly
-        
-        /**
-         The data in the keychain item can be accessed only while the device is unlocked by the user.
-         
-         This is recommended for items that need to be accessible only while the application is in the foreground. Items with this attribute migrate to a new device when using encrypted backups.
-         
-         This is the default value for keychain items added without explicitly setting an accessibility constant.
-         */
-        
+
+        /// The data is accessable while the phone is unlocked. This is the default behaviour for a keychain item
+        /// Included in encrypted backups
         case whenUnlocked
         
-        /**
-         The data in the keychain item can be accessed only while the device is unlocked by the user.
-         
-         This is recommended for items that need to be accessible only while the application is in the foreground. Items with this attribute do not migrate to a new device. Thus, after restoring from a backup of a different device, these items will not be present.
-         */
-        
+        /// The data is accessable while the phone is unlocked. This is the default behaviour for a keychain item
+        /// NOT included in encrypted backups
         case whenUnlockedThisDeviceOnly
+        
+        /// The data is only available when the devicde is unlocked. A passcode must be set to use this option. Upon deleting the passcode the data will be deleted as well.
+        /// NOT included in backups
+        case whenPasscodeSetThisDeviceOnly
         
         public var rawValue: CFString {
             switch self {
@@ -156,12 +118,8 @@ public extension KeychainManager {
                 return kSecAttrAccessibleAfterFirstUnlock
             case .afterFirstUnlockThisDeviceOnly:
                 return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-            case .always:
-                return kSecAttrAccessibleAlways
             case .whenPasscodeSetThisDeviceOnly:
                 return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-            case .alwaysThisDeviceOnly:
-                return kSecAttrAccessibleAlwaysThisDeviceOnly
             case .whenUnlocked:
                 return kSecAttrAccessibleWhenUnlocked
             case .whenUnlockedThisDeviceOnly:
@@ -175,12 +133,8 @@ public extension KeychainManager {
                 self = .afterFirstUnlock
             case kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly:
                 self = .afterFirstUnlockThisDeviceOnly
-            case kSecAttrAccessibleAlways:
-                self = .always
             case kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly:
                 self = .whenPasscodeSetThisDeviceOnly
-            case kSecAttrAccessibleAlwaysThisDeviceOnly:
-                self = .alwaysThisDeviceOnly
             case kSecAttrAccessibleWhenUnlocked:
                 self = .whenUnlocked
             case kSecAttrAccessibleWhenUnlockedThisDeviceOnly:
