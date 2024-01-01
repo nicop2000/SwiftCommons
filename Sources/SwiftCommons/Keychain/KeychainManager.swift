@@ -60,7 +60,7 @@ public final class KeychainManager {
         type: ItemType,
         key: String,
         attributes: ItemAttributes? = nil,
-        accessLevel: KeychainItemAccessLevel? = nil, synchronize: Bool = false) throws
+        accessLevel: KeychainItemAccessLevel? = nil, synchronize: Bool = false, updateWhenExists: Bool = false) throws
     {
         let data = Coder().encode(item)
         var query = buildQueryDict(type: type, key: key, attributes: attributes, accessLevel: accessLevel, synchronize: synchronize)
@@ -69,7 +69,12 @@ public final class KeychainManager {
         let result = SecItemAdd(query as CFDictionary, nil)
 
         if result != errSecSuccess {
-            throw convertError(result)
+            let error = convertError(result)
+            if error == .duplicateItem && updateWhenExists {
+                try self.updateItemData(with: item, ofClass: type, key: key, attributes: attributes, accessLevel: accessLevel)
+            } else {
+                throw error
+            }
         }
     }
 

@@ -50,7 +50,7 @@ public extension KeychainManager {
         }
     }
 
-    enum KeychainError: Error {
+    enum KeychainError: Error, Equatable {
         case invalidData
         case itemNotFound
         case duplicateItem

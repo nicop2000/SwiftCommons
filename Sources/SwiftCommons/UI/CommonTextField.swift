@@ -7,9 +7,11 @@
 
 import SwiftUI
 
+@available(iOS 17.0, *)
 public struct CommonTextField: View {
     @Environment(\.isEnabled) private var isEnabled
     @Binding var text: String
+    @FocusState private var isFocused: Bool
 
     var validator: () -> Bool
     var required: Bool
@@ -19,11 +21,12 @@ public struct CommonTextField: View {
     private let onEditingChanged: (() -> Void)?
     private let errorText: String?
     private let normallyObscured: Bool
+    private let placeholder: String
 
     @State private var clearButton = false
     @State private var obscureDisabled: Bool = false
 
-    public init(text: Binding<String>, validator: @escaping () -> Bool = { true }, required: Bool = false, keyboardType: UIKeyboardType = .default, autocapitalization: TextInputAutocapitalization = .sentences, onEditingChanged: (() -> Void)? = nil, errorText: String? = nil, normallyObscured: Bool = false) {
+    public init(text: Binding<String>, validator: @escaping () -> Bool = { true }, required: Bool = false, keyboardType: UIKeyboardType = .default, autocapitalization: TextInputAutocapitalization = .sentences, onEditingChanged: (() -> Void)? = nil, errorText: String? = nil, normallyObscured: Bool = false, placeholder: String = "") {
         self._text = text
         self.validator = validator
         self.required = required
@@ -32,6 +35,7 @@ public struct CommonTextField: View {
         self.onEditingChanged = onEditingChanged
         self.errorText = errorText
         self.normallyObscured = normallyObscured
+        self.placeholder = placeholder
     }
 
     public var body: some View {
@@ -39,12 +43,13 @@ public struct CommonTextField: View {
             if isEnabled {
                 Section {
                     if obscureDisabled || !normallyObscured {
-                        TextField(required ? "erforderlich" : "", text: $text)
+                        TextField(required ? "erforderlich" : placeholder, text: $text)
                             .keyboardType(keyboardType)
                             .textInputAutocapitalization(autocapitalization)
                             .onAppear {
                                 clearButton = !text.isEmpty
                             }
+                            .focused($isFocused)
                             .onChange(of: text) { newValue in
                                 clearButton = !newValue.isEmpty
                                 if onEditingChanged != nil {
@@ -58,46 +63,31 @@ public struct CommonTextField: View {
                             .onAppear {
                                 clearButton = !text.isEmpty
                             }
+                            .focused($isFocused)
                             .onChange(of: text) { newValue in
                                 clearButton = !newValue.isEmpty
                                 if onEditingChanged != nil {
                                     onEditingChanged!()
                                 }
                             }
-                    }
-                    if clearButton {
-                        if normallyObscured {
-                            if obscureDisabled {
-                                Button(action: {
-                                    obscureDisabled = false
-                                }, label: {
-                                    Image(systemName: "eye").foregroundStyle(.gray)
-                                })
-                            } else {
-                                Button(action: {
-                                    obscureDisabled = true
-                                }, label: {
-                                    Image(systemName: "eye.slash").foregroundStyle(.gray)
-                                })
+                            .onChange(of: isFocused) {
+                                obscureDisabled = false
                             }
-                            Button(action: {
-                                self.text = ""
-                            }) {
-                                Image(systemName: "xmark.circle.fill").foregroundColor(.gray)
-                            }.buttonStyle(.borderless)
-                        }
                     }
-
-                } footer: {
-                    if let errorText {
-                        if validator() && !errorText.isEmpty {
-                            HStack {
-                                Text(errorText)
-                                    .foregroundStyle(.red)
-                                    .font(.caption)
-                            }
-                            Spacer()
-                        }
+                    if clearButton && isFocused {
+                        Button(action: {
+                            self.text = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill").foregroundColor(.gray)
+                        }.buttonStyle(.borderless)
+                    }
+                    if normallyObscured && !text.isEmpty {
+                        Button(action: {
+                            obscureDisabled.toggle()
+                        }, label: {
+                            Image(systemName: obscureDisabled ? "eye": "eye.slash" ).foregroundStyle(.gray)
+                        })
+                        .padding(.trailing, 5)
                     }
                 }
             } else {
@@ -111,6 +101,7 @@ public struct CommonTextField: View {
     }
 }
 
+@available(iOS 17.0, *)
 #Preview {
     VStack {
         LabeledTextField(text: .constant("email@google.com"),

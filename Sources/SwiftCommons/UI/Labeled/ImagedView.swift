@@ -1,25 +1,27 @@
 //
-//  LabeledView.swift
-//  Foodbank
+//  ImagedView.swift
 //
-//  Created by Nico Petersen on 27.09.23.
+//
+//  Created by Nico Petersen on 31.10.23.
 //
 
 import SwiftUI
 
-public struct LabeledView<Content: View>: View {
-    var label: String?
+public struct ImagedView<Content: View>: View {
+    var systemName: String
     var content: Content
     var alignment: Axis.Set
     var labelColor: Color
     var horizontalPadding: CGFloat
+    var renderingMode: SymbolRenderingMode
     
-    public init(label: String? = nil, alignment: Axis.Set = .horizontal, labelColor: Color = .primary, horizontalPadding: CGFloat = 50, @ViewBuilder content: () -> Content) {
-        self.label = label
+    public init(systemName: String, renderingMode: SymbolRenderingMode = .multicolor, alignment: Axis.Set = .horizontal, labelColor: Color = .primary, horizontalPadding: CGFloat = 25, @ViewBuilder content: () -> Content) {
+        self.systemName = systemName
         self.content = content()
         self.alignment = alignment
         self.labelColor = labelColor
         self.horizontalPadding = horizontalPadding
+        self.renderingMode = renderingMode
     }
 
     public var body: some View {
@@ -28,11 +30,11 @@ public struct LabeledView<Content: View>: View {
                 if alignment == .horizontal {
                     VStack(alignment: .center) {
                         HStack(alignment: .center) {
-                            if let label {
-                                Text(label)
-                                    .foregroundColor(labelColor)
+                            
+                                Image(systemName: systemName)
+                                    .symbolRenderingMode(renderingMode)
                                     .frame(minWidth: horizontalPadding, alignment: .leading)
-                            }
+                            
                             content
                         }
                     }
@@ -40,10 +42,10 @@ public struct LabeledView<Content: View>: View {
                 else {
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 5) {
-                            if let label {
-                                Text(label)
-                                    .foregroundColor(labelColor)
-                            }
+                            
+                                Image(systemName: systemName)
+                                    .symbolRenderingMode(renderingMode)
+                            
                             content
                         }
                     }
@@ -51,11 +53,5 @@ public struct LabeledView<Content: View>: View {
             }
 
         }
-    }
-}
-
-#Preview {
-    LabeledView(label: "Label", alignment: .horizontal, labelColor: .red) {
-        Text("Text")
     }
 }
