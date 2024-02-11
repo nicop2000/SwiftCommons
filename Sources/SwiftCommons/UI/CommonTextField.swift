@@ -17,25 +17,29 @@ public struct CommonTextField: View {
     var required: Bool
 
     private let keyboardType: UIKeyboardType
+    private let textContentType: UITextContentType?
     private let autocapitalization: TextInputAutocapitalization
-    private let onEditingChanged: (() -> Void)?
+    private let onEditingChanged: (Bool) -> Void
     private let errorText: String?
     private let normallyObscured: Bool
     private let placeholder: String
+    private let autoCorrectionDisabled: Bool
 
     @State private var clearButton = false
     @State private var obscureDisabled: Bool = false
 
-    public init(text: Binding<String>, validator: @escaping () -> Bool = { true }, required: Bool = false, keyboardType: UIKeyboardType = .default, autocapitalization: TextInputAutocapitalization = .sentences, onEditingChanged: (() -> Void)? = nil, errorText: String? = nil, normallyObscured: Bool = false, placeholder: String = "") {
+    public init(text: Binding<String>, validator: @escaping () -> Bool = { true }, required: Bool = false, keyboardType: UIKeyboardType = .default, autocapitalization: TextInputAutocapitalization = .sentences, textContentType: UITextContentType? = nil, onEditingChanged: @escaping ((Bool) -> Void) = {_ in}, errorText: String? = nil, normallyObscured: Bool = false, placeholder: String = "", autoCorrectionDisabled: Bool = false) {
         self._text = text
         self.validator = validator
         self.required = required
         self.keyboardType = keyboardType
+        self.textContentType = textContentType
         self.autocapitalization = autocapitalization
         self.onEditingChanged = onEditingChanged
         self.errorText = errorText
         self.normallyObscured = normallyObscured
         self.placeholder = placeholder
+        self.autoCorrectionDisabled = autoCorrectionDisabled
     }
 
     public var body: some View {
@@ -43,32 +47,32 @@ public struct CommonTextField: View {
             if isEnabled {
                 Section {
                     if obscureDisabled || !normallyObscured {
-                        TextField(required ? "erforderlich" : placeholder, text: $text)
-                            .keyboardType(keyboardType)
-                            .textInputAutocapitalization(autocapitalization)
-                            .onAppear {
-                                clearButton = !text.isEmpty
-                            }
-                            .focused($isFocused)
-                            .onChange(of: text) { newValue in
-                                clearButton = !newValue.isEmpty
-                                if onEditingChanged != nil {
-                                    onEditingChanged!()
-                                }
-                            }
+                        TextField(required ? "erforderlich" : placeholder, text: $text,
+                                  onEditingChanged: onEditingChanged)
+                                  .keyboardType(keyboardType)
+                                  .textContentType(textContentType)
+                                  .textInputAutocapitalization(autocapitalization)
+                                  .autocorrectionDisabled(autoCorrectionDisabled)
+                                  .onAppear {
+                                      clearButton = !text.isEmpty
+                                  }
+                                  .focused($isFocused)
+                                  .onChange(of: text) { newValue in
+                                      clearButton = !newValue.isEmpty
+                                  }
                     } else {
                         SecureField(required ? "erforderlich" : "", text: $text)
                             .keyboardType(keyboardType)
                             .textInputAutocapitalization(.never)
+                            .textContentType(textContentType)
+                            .autocorrectionDisabled()
                             .onAppear {
                                 clearButton = !text.isEmpty
                             }
                             .focused($isFocused)
                             .onChange(of: text) { newValue in
                                 clearButton = !newValue.isEmpty
-                                if onEditingChanged != nil {
-                                    onEditingChanged!()
-                                }
+                                onEditingChanged(false)
                             }
                             .onChange(of: isFocused) {
                                 obscureDisabled = false
@@ -85,7 +89,7 @@ public struct CommonTextField: View {
                         Button(action: {
                             obscureDisabled.toggle()
                         }, label: {
-                            Image(systemName: obscureDisabled ? "eye": "eye.slash" ).foregroundStyle(.gray)
+                            Image(systemName: obscureDisabled ? "eye" : "eye.slash").foregroundStyle(.gray)
                         })
                         .padding(.trailing, 5)
                     }

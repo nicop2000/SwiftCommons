@@ -36,3 +36,14 @@ public extension View {
         }
     }
 }
+extension Color {
+    public static let adapting = dynamicColor(light: .black, dark: .white)
+    public static let adaptingInverse = dynamicColor(light: .white, dark: .black)
+    static func dynamicColor(light: Color, dark: Color) -> Color {
+        let dynamicColor = Color(UIColor { (traitCollection) -> UIColor in
+            return traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+        })
+        return dynamicColor
+    }
+
+}

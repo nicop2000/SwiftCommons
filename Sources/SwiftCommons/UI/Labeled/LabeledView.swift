@@ -32,6 +32,7 @@ public struct LabeledView<Content: View>: View {
                                 Text(label)
                                     .foregroundColor(labelColor)
                                     .frame(minWidth: horizontalPadding, alignment: .leading)
+                                    .font(.footnote)
                             }
                             content
                         }
@@ -55,7 +56,7 @@ public struct LabeledView<Content: View>: View {
 }
 
 #Preview {
-    LabeledView(label: "Label", alignment: .horizontal, labelColor: .red) {
+    LabeledView(label: "Label", alignment: .horizontal, labelColor: .green) {
         Text("Text")
     }
 }
